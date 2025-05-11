@@ -1,0 +1,10 @@
+{
+    "Name": "Trials_of_the_Valley",
+    "Author": "ChoppingSlime",
+    "Version": "1.0.0",
+    "Description": "Seasonal and yearly trials with rewards and punishments",
+    "UniqueID": "ChoppingSlime.Trials_of_the_Valley",
+    "EntryDll": "Trials_of_the_Valley.dll",
+    "MinimumApiVersion": "4.0.0",
+    "UpdateKeys": []
+}
