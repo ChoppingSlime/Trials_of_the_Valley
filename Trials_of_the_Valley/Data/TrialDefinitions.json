@@ -1,0 +1,13 @@
+[
+    {
+        "ID": "PLANT_SEASONAL_CROP",
+        "Name": "Seasonal Sower",
+        "Type": "Farming",
+        "Description": "Grow {AMOUNT} of {CROP}.",
+        "DynamicCrop": true,
+        "GoalAmountBase": 10,
+        "ScalesWithYear": true,
+        "DurationDays": 30
+    }
+
+]
