@@ -31,7 +31,6 @@ namespace Trials_of_the_Valley
 
             string description = template.Description;
 
-            // Simple token system
             if (description.Contains("{CROP}"))
             {
                 trial.TargetCrop = GetRandomCropForSeason(Game1.currentSeason);
