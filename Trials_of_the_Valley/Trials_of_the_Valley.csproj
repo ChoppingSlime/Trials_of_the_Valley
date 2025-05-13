@@ -7,11 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="Pathoschild.Stardew.ModBuildConfig" Version="4.4.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Icons\" />
+    <Folder Include="icons\" />
   </ItemGroup>
 
 </Project>
