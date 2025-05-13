@@ -35,7 +35,7 @@ namespace Trials_of_the_Valley
         public static void LoadTrialDefinitions(IModHelper helper)
         {
             _trialsByCondition = helper.ModContent
-        .Load<Dictionary<TrialConditionType, List<Trial>>>("data/trialdefinitions.json")
+        .Load<Dictionary<TrialConditionType, List<Trial>>>("assets/TrialDefinitions.json")
         ?? new();
         }
 
