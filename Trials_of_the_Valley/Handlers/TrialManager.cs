@@ -6,6 +6,7 @@ using StardewModdingAPI.Utilities;
 
 using System;
 using Microsoft.Xna.Framework;
+using StardewValley.Quests;
 
 
 namespace Trials_of_the_Valley
@@ -15,10 +16,12 @@ namespace Trials_of_the_Valley
 
         private readonly IMonitor Monitor;
 
+        public Dictionary<string, string> PendingMails = new();
         public TrialManager(IMonitor monitor)
         {
             this.Monitor = monitor;
         }
+        
 
         /// <summary>
         /// A dictionary that holds the trial definitions grouped by their condition type.
@@ -49,7 +52,7 @@ namespace Trials_of_the_Valley
         {
             // if no trial definition loaded or null >> send an error
             if (_trialsByCondition == null || _trialsByCondition.Count == 0)
-            { 
+            {
                 this.Monitor.Log("No trial definitions loaded", LogLevel.Error);
                 return null;
             }
@@ -124,6 +127,39 @@ namespace Trials_of_the_Valley
         }
 
 
+        public string GetTrialId()
+        {
+            int seasonIndex = HelperFunctions.GetSeasonIndex(Game1.currentSeason);
+            int year = Game1.year;
+            int trialNumber = seasonIndex + (year - 1) * 4 + 1;
+            return $"Trial #{trialNumber}";
+        }
 
+        public string GetTrialContent(string trialId)
+        {
+            string mailContent = $"A new quest has arrived! [#]{trialId}";
+            return mailContent;
+        }
+
+        public void TryGenerateNewTrial()
+        {
+            string trialId = GetTrialId();
+            string mailId = $"Trial_{trialId.Replace(" ", "_")}";
+
+            if (!Game1.player.mailReceived.Contains(mailId))
+            {
+                string mailContent = GetTrialContent(trialId);
+
+                // Register it for mail injection
+                PendingMails[mailId] = mailContent;
+
+                // Schedule delivery
+                Game1.player.mailForTomorrow.Add(mailId);
+
+
+
+                Monitor.Log($"Scheduled new trial mail: {mailId}", LogLevel.Info);
+            }
+        }
     }
 }

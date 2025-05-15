@@ -14,7 +14,7 @@ using System.Xml.Linq;
 namespace Trials_of_the_Valley
 {
 
-    public static class GetItemHelper
+    public static class HelperFunctions
     {
         /// <summary>
         /// Returns a list of ALL the crop IDs that are available in the current season.
@@ -36,5 +36,19 @@ namespace Trials_of_the_Valley
             }
             return availableCrops;
         }
+
+        public static int GetSeasonIndex(string season)
+        {
+            return season switch
+            {
+                "spring" => 0,
+                "summer" => 1,
+                "fall" => 2,
+                "winter" => 3,
+                _ => 0
+            };
+        }
+
+       
     }
 }
