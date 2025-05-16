@@ -2,27 +2,39 @@
     "HarvestSpecificCrop": [
         {
             "ID": "harvest_ancient_fruit",
-            "Name": "Ancient Cultivator",
+            "Type": "ItemHarvest",
+            "Title": "Ancient Cultivator",
             "Description": "Grow and harvest {AMOUNT} Ancient Fruit.",
-            "ConditionType": "HarvestSpecificCrop",
-            "TargetEntity": "Ancient Fruit",
+            "ObjectiveHint": "Good luck",
+            "CompletionRequirements": "(O)454 {AMOUNT}",
+            "NextQuestIds": "",
+            "MoneyReward": 0,
+            "RewardDescription": "A randomly picked very valuable item!",
+            "CanBeCancelled": false,
+            "ReactionText": "",
+            "ConditionType": "Basic",
             "StartingGoalAmount": 10,
             "GoalAmountMultiplier": 5,
-            "DurationDays": 120,
             "Tags": []
         }
     ],
     "HarvestGeneralCrop": [
         {
             "ID": "harvest_any_crop_year1",
-            "Name": "Farmhand Rookie",
-            "Description": "Harvest {AMOUNT} crops of any type.",
+            "Type": "Basic",
+            "Title": "Farmhand Rookie",
+            "Description": "Grow and harvest {AMOUNT} crops of any type.",
+            "ObjectiveHint": "You will need a lot of luck",
+            "CompletionRequirements": "",
+            "NextQuestIds": "",
+            "MoneyReward": 0,
+            "RewardDescription": "A random super valuable reward!",
+            "CanBeCancelled": false,
+            "ReactionText": "",
             "ConditionType": "HarvestGeneralCrop",
-            "TargetEntity": null,
             "StartingGoalAmount": 1000,
             "GoalAmountMultiplier": 2,
-            "DurationDays": 120,
-            "Tags": [ "FirstYear"]
+            "Tags": [ "FirstYear" ]
         }
     ]
 

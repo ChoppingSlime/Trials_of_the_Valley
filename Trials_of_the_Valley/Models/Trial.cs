@@ -1,7 +1,7 @@
 ﻿
 public enum TrialConditionType
 {
-    HarvestSpecificCrop,    // Harvest a specific type of crop
+    Basic,
     HarvestGeneralCrop, // Harvest any kind of crop
 }
 
@@ -16,29 +16,62 @@ public enum TrialTags
     BusUnlocked,    // Only if bus is unlocked
     ShipUnlocked    // Only if ship is unlocked
 }
+public enum TrialType
+{
+    Basic,
+    Crafting,
+    Location,
+    Building,
+    ItemDelivery,
+    Monster,
+    ItemHarvest,
+    LostItem,
+    SecretLostItem,
+    Social
+}
 
 public class Trial
 {
+    /// <summary> Unique string ID for the trial.</summary>
     public string ID { get; set; } = string.Empty;
-    public string Name { get; set; } = string.Empty;
+
+    /// <summary> Trial type, e.g., Basic, Crafting, Social, etc.</summary>
+    public TrialType Type { get; set; } = TrialType.Basic;
+
+    /// <summary> Title of the trial.</summary>
+    public string Title { get; set; } = string.Empty;
+
+    /// <summary> Description for the trial.</summary>
     public string Description { get; set; } = string.Empty;
 
-    /// <summary> How completing the quest is determined.</summary>
-    public TrialConditionType ConditionType { get; set; }
+    /// <summary> Optional objective hint to help the player.</summary>
+    public string? ObjectiveHint { get; set; }
 
-    /// <summary> Specific item target id.</summary>
-    public string? TargetEntity { get; set; }
+    /// <summary> Varyes depending on type.</summary>
+    public string? CompletionRequirements { get; set; }
+
+    /// <summary> Optional next quest IDs to unlock after completion, separated by spaces.</summary>
+    public string? NextQuestIds { get; set; }
+
+    /// <summary> Money reward for completing the quest.</summary>
+    public int MoneyReward { get; set; } = 0;
+
+    /// <summary> Optional reward description, leave blank or very short if no special reward.</summary>
+    public string? RewardDescription { get; set; }
+
+    /// <summary> Whether the trial can be cancelled by the player.</summary>
+    public bool CanBeCancelled { get; set; } = false;
+
+    /// <summary> Optional reaction text, required for ItemDelivery and some Monster quests.</summary>
+    public string? ReactionText { get; set; }
+
+    /// <summary> Optional reaction text, required for ItemDelivery and some Monster quests.</summary>
+    public TrialConditionType ConditionType { get; set; }
 
     public int StartingGoalAmount { get; set; } = 1;
 
-    /// <summary> Multiplier every year.</summary>
-    public int GoalAmountMultiplier { get; set; } = 0; 
+    public int GoalAmountMultiplier { get; set; } = 0;
 
-    /// <summary> How many days does it last.</summary>
-    public int DurationDays { get; set; } = 112; // 1 year default
-
-    /// <summary> Used to filter only available tags.</summary>
-    public List<string> Tags { get; set; } = new(); // 
-
-  
+    public List<string> Tags { get; set; } = new();
 }
+

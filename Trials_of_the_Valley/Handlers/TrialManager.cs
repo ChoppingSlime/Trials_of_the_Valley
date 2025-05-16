@@ -18,6 +18,8 @@ namespace Trials_of_the_Valley
         private Mailbox _mailbox;
         private readonly IMonitor _monitor;
 
+        private string TrialMailPrefix = "A new quest has arrived! ";
+
         public TrialManager(IMonitor monitor, Mailbox mailbox)
         {
 
@@ -131,30 +133,40 @@ namespace Trials_of_the_Valley
 
         public void GenerateNewTrialAndSendMail()
         {
-            _monitor.Log($"trying to add new trial", LogLevel.Info);
+            _monitor.Log("Trying to add new trial", LogLevel.Info);
 
-            string trialId = GetTrialId();
-            string mailId = $"Trial_{trialId.Replace(" ", "_")}";
+            Trial? trial = GetRandomTrial();
+            if (trial == null)
+            {
+                _monitor.Log("No valid trial coul be selected.", LogLevel.Warn);
+                return;
+            }
+
+            string mailId = trial.ID;
 
             if (!Game1.player.mailReceived.Contains(mailId))
             {
-                string mailContent = GetTrialContent(trialId);
-
+                string mailContent = FormatTrialMail(trial);
                 _mailbox.AddMail(mailId, mailContent);
-
+                _monitor.Log($"Mail '{mailId}' sent for trial '{trial.ID}'", LogLevel.Info);
+            }
+            else
+            {
+                _monitor.Log($"Mail '{mailId}' already received.", LogLevel.Debug);
             }
         }
 
-
-        public string GetTrialId()
+        private string FormatTrialMail(Trial trial)
         {
-            int seasonIndex = HelperFunctions.GetSeasonIndex(Game1.currentSeason);
-            int year = Game1.year;
-            int trialNumber = seasonIndex + (year - 1) * 4 + 1;
-            return $"Trial #{trialNumber}";
+            // Mail ID that will trigger the quest
+            string mailTitle = $"TrialMail_{trial.Title}";
+
+            // Actual message content
+            string content = $"{TrialMailPrefix}{trial.Description}[#]{mailTitle}";
+
+            return content;
         }
 
-        public string GetTrialContent(string trialId) => $"A new quest has arrived! [#]{trialId}";
 
 
     }
