@@ -7,27 +7,30 @@ using StardewModdingAPI.Utilities;
 using System;
 using Microsoft.Xna.Framework;
 using StardewValley.Quests;
+using Trials_of_the_Valley.utils;
 
 
 namespace Trials_of_the_Valley
 {
     public class TrialManager
     {
+ 
+        private Mailbox _mailbox;
+        private readonly IMonitor _monitor;
 
-        private readonly IMonitor Monitor;
-
-        public Dictionary<string, string> PendingMails = new();
-        public TrialManager(IMonitor monitor)
+        public TrialManager(IMonitor monitor, Mailbox mailbox)
         {
-            this.Monitor = monitor;
+
+            _monitor = monitor;
+            _mailbox = mailbox;
         }
-        
+
 
         /// <summary>
         /// A dictionary that holds the trial definitions grouped by their condition type.
         /// The key is the <see cref="TrialConditionType"/> and the value is a list of trials that meet that condition.
         /// </summary>
-        private static Dictionary<TrialConditionType, List<Trial>>? _trialsByCondition;
+        private static Dictionary<TrialConditionType, List<Trial>>? TrialsByCondition;
 
 
         /// <summary>
@@ -37,7 +40,7 @@ namespace Trials_of_the_Valley
         /// <param name="helper">The mod helper instance used to access content files.</param>
         public static void LoadTrialDefinitions(IModHelper helper)
         {
-            _trialsByCondition = helper.ModContent
+            TrialsByCondition = helper.ModContent
         .Load<Dictionary<TrialConditionType, List<Trial>>>("assets/TrialDefinitions.json")
         ?? new();
         }
@@ -51,14 +54,14 @@ namespace Trials_of_the_Valley
         public Trial? GetRandomTrial()
         {
             // if no trial definition loaded or null >> send an error
-            if (_trialsByCondition == null || _trialsByCondition.Count == 0)
+            if (TrialsByCondition == null || TrialsByCondition.Count == 0)
             {
-                this.Monitor.Log("No trial definitions loaded", LogLevel.Error);
+                this._monitor.Log("No trial definitions loaded", LogLevel.Error);
                 return null;
             }
 
             // Flattens the huge list of trials and excludes the not available ones
-            List<Trial> allTrials = _trialsByCondition
+            List<Trial> allTrials = TrialsByCondition
                 .SelectMany(kvp => kvp.Value)
                 .Where(IsTrialDoable)
                 .ToList();
@@ -66,7 +69,7 @@ namespace Trials_of_the_Valley
             // If not available trails to select from >> send an error
             if (allTrials.Count == 0)
             {
-                this.Monitor.Log("No available trials to select from", LogLevel.Error);
+                this._monitor.Log("No available trials to select from", LogLevel.Error);
                 return null;
             }
 
@@ -126,6 +129,22 @@ namespace Trials_of_the_Valley
             return true;
         }
 
+        public void GenerateNewTrialAndSendMail()
+        {
+            _monitor.Log($"trying to add new trial", LogLevel.Info);
+
+            string trialId = GetTrialId();
+            string mailId = $"Trial_{trialId.Replace(" ", "_")}";
+
+            if (!Game1.player.mailReceived.Contains(mailId))
+            {
+                string mailContent = GetTrialContent(trialId);
+
+                _mailbox.AddMail(mailId, mailContent);
+
+            }
+        }
+
 
         public string GetTrialId()
         {
@@ -135,31 +154,8 @@ namespace Trials_of_the_Valley
             return $"Trial #{trialNumber}";
         }
 
-        public string GetTrialContent(string trialId)
-        {
-            string mailContent = $"A new quest has arrived! [#]{trialId}";
-            return mailContent;
-        }
-
-        public void TryGenerateNewTrial()
-        {
-            string trialId = GetTrialId();
-            string mailId = $"Trial_{trialId.Replace(" ", "_")}";
-
-            if (!Game1.player.mailReceived.Contains(mailId))
-            {
-                string mailContent = GetTrialContent(trialId);
-
-                // Register it for mail injection
-                PendingMails[mailId] = mailContent;
-
-                // Schedule delivery
-                Game1.player.mailForTomorrow.Add(mailId);
+        public string GetTrialContent(string trialId) => $"A new quest has arrived! [#]{trialId}";
 
 
-
-                Monitor.Log($"Scheduled new trial mail: {mailId}", LogLevel.Info);
-            }
-        }
     }
 }

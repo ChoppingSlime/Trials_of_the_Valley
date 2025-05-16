@@ -4,19 +4,24 @@ using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewModdingAPI.Utilities;
 using StardewValley;
+using Trials_of_the_Valley.utils;
 
 
 namespace Trials_of_the_Valley
 {
     /// <summary>The mod entry point.</summary>
-    internal sealed class ModEntry : Mod
+    public  class ModEntry : Mod
     {
         private TrialManager? _trialManager;
+        public static Mailbox? Mailbox;
 
 
         public override void Entry(IModHelper helper)
         {
-            _trialManager = new TrialManager(this.Monitor);
+            
+            Mailbox = new Mailbox(this.Monitor, helper.GameContent);
+
+            _trialManager = new TrialManager(this.Monitor, Mailbox);
 
 
             helper.Events.GameLoop.SaveLoaded += OnSaveLoaded;
@@ -38,18 +43,25 @@ namespace Trials_of_the_Valley
 
         private void OnAssetRequested(object sender, AssetRequestedEventArgs e)
         {
-            if (e.NameWithoutLocale.IsEquivalentTo("Data/Mail"))
+            if (e.NameWithoutLocale.IsEquivalentTo("Data/Mail"))   
             {
+                this.Monitor.Log("receiving request to mail asset", LogLevel.Info);
+
                 e.Edit(asset =>
                 {
+                    this.Monitor.Log("adding asset", LogLevel.Info);
+
                     var editor = asset.AsDictionary<string, string>();
-                    foreach (var mail in _trialManager.PendingMails)
+                    foreach (var mail in Mailbox.PendingMails)
                     {
                         editor.Data[mail.Key] = mail.Value;
                     }
+
+                    this.Monitor.Log($"{editor}", LogLevel.Info);
                 });
             }
         }
+
 
         private void OnDayStarted(object? sender, DayStartedEventArgs e)
         {
@@ -58,14 +70,13 @@ namespace Trials_of_the_Valley
                 Game1.addMail("test 1");
             }
 
-            if (Game1.dayOfMonth.Equals(2)){
-                _trialManager.TryGenerateNewTrial();
-                this.Monitor.Log("Day 2", LogLevel.Info);
-            }
 
             if (Game1.dayOfMonth.Equals(3))
             {
+               
                 this.Monitor.Log("Day 3", LogLevel.Info);
+                _trialManager.GenerateNewTrialAndSendMail();
+
             }
 
         }
@@ -78,17 +89,9 @@ namespace Trials_of_the_Valley
                 return;
 
 
-            Trial? randomTrial = null;
+         
 
-            // Get a random trial
-            if (_trialManager != null) 
-                randomTrial = _trialManager.GetRandomTrial();
             
-            // If a trial is returned, log its details; otherwise, log that no trial was found
-            if (randomTrial != null)
-                this.Monitor.Log($"Random Trial: {randomTrial.Name} - {randomTrial.Description}", LogLevel.Info);
-            else
-                this.Monitor.Log("No random trial available.", LogLevel.Error);
             
 
         }
