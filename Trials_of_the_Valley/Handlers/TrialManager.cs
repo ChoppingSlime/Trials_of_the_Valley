@@ -16,15 +16,17 @@ namespace Trials_of_the_Valley
     {
  
         private Mailbox _mailbox;
+        private Questbox _questbox;
         private readonly IMonitor _monitor;
 
         
 
-        public TrialManager(IMonitor monitor, Mailbox mailbox)
+        public TrialManager(IMonitor monitor, Mailbox mailbox, Questbox questbox)
         {
 
             _monitor = monitor;
             _mailbox = mailbox;
+            _questbox = questbox;
         }
 
 
@@ -36,8 +38,8 @@ namespace Trials_of_the_Valley
 
 
         /// <summary>
-        /// Loads all trial definitions from the mod's embedded JSON file into memory,
-        /// deserializing them into a dictionary grouped by <see cref="TrialConditionType"/>.
+        /// Loads trial definitions from the embedded JSON file and groups them by <see cref="TrialConditionType"/>.
+        /// If the file is missing or empty, an empty dictionary will be initialized.
         /// </summary>
         /// <param name="helper">The mod helper instance used to access content files.</param>
         public static void LoadTrialDefinitions(IModHelper helper)
@@ -49,8 +51,8 @@ namespace Trials_of_the_Valley
 
 
         /// <summary>
-        /// Retrieves a random trial from the available trials that are marked as "doable".
-        /// If no trials are loaded or if no available trials are found, logs an error and returns null.
+        /// Selects a random trial that meets current conditions (tags, year, etc.).
+        /// Logs an error and returns null if no trials are available.
         /// </summary>
         /// <returns>A random <see cref="Trial"/> if available, otherwise null.</returns>
         public Trial? GetRandomTrial()
@@ -82,9 +84,9 @@ namespace Trials_of_the_Valley
 
 
         /// <summary>
-        /// Checks if the Trial is doable or not based on it's tags.
+        /// Determines whether a trial can currently be assigned based on its tags.
         /// </summary>
-        /// <returns> "false" if the trial is not doable, else "true".</returns>
+        /// <returns>True if the trial can be assigned; otherwise, false.</returns>
         public static bool IsTrialDoable(Trial trial)
         {
             foreach (string tag in trial.Tags)
@@ -132,7 +134,7 @@ namespace Trials_of_the_Valley
         }
 
         /// <summary>
-        /// Gets a random trial, sets up a quest for it and sends the mail containing it.
+        /// Sets up a random trial by creating its quest and sending the associated mail.
         /// </summary>
         public void GenerateNewTrialAndSendMail()
         {
@@ -157,28 +159,73 @@ namespace Trials_of_the_Valley
         }
 
         /// <summary>
-        /// Creates the data for the Trial's quest and adds it to the cache.
+        /// /// Builds the quest content string for the given trial.
         /// </summary>
         private void CreateTrialQuest(Trial trial)
         {
+            
   
-            string mailContent = GenerateTrialMailContent(trial);
-            _mailbox.AddMail(trial.ID, mailContent);
+            string questContent = GenerateTrialQuestContent(trial);
+            _questbox.AddQuest(trial.ID, questContent);
 
-            _monitor.Log($"Mail '{trial.ID}' sent for trial '{trial.ID}'", LogLevel.Info);
+            _monitor.Log($"Quest '{trial.ID}' sent", LogLevel.Info);
             
 
         }
 
         /// <summary>
-        /// Sends a mail containing description of the trial. When opened it will trigger the new quest.
+        /// Creates a proper quest content for the trial.
+        /// </summary>
+        /// <returns> The content of Trial quest containing all fields.</returns>
+        private string GenerateTrialQuestContent(Trial trial)
+        {
+            if (string.IsNullOrWhiteSpace(trial.ObjectiveHint))
+                throw new InvalidOperationException($"Trial '{trial.ID}' is missing an ObjectiveHint.");
+
+            if (string.IsNullOrWhiteSpace(trial.CompletionRequirements))
+                throw new InvalidOperationException($"Trial '{trial.ID}' is missing CompletionRequirements.");
+
+            string type = trial.Type.ToString();
+            string title = trial.Title;
+            string description = trial.Description;
+            string objectiveHint = trial.ObjectiveHint;
+            string completionRequirements = trial.CompletionRequirements;
+            string nextQuestIds = "";
+            string moneyReward = "";
+            string rewardDescription = "";
+            string canBeCancelled = "";
+            string reactionText = "";
+
+            // Slash-separated quest content
+            string questContent = string.Join("/", new[]
+            {
+                type,
+                title,
+                description,
+                objectiveHint,
+                completionRequirements,
+                nextQuestIds,
+                moneyReward,
+                rewardDescription,
+                canBeCancelled,
+                reactionText
+            });
+
+            //TO-DO: add functio that substitutes the {AMOUNT} with a the actual amount!!
+
+            return questContent;
+        }
+
+        /// <summary>
+        /// Creates the  mail data containing description of the trial. 
+        /// Immedatly sent to the player.
         /// </summary>
         private void SendTrialMail(Trial trial)
         {
             string mailContent = GenerateTrialMailContent(trial);
             _mailbox.AddMail(trial.ID, mailContent);
 
-            _monitor.Log($"Mail '{trial.ID}' sent for trial '{trial.ID}'", LogLevel.Info);
+            _monitor.Log($"Mail '{trial.ID}' sent", LogLevel.Info);
 
         }
 

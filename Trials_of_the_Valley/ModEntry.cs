@@ -21,7 +21,7 @@ namespace Trials_of_the_Valley
         {
             _questbox = new Questbox(this.Monitor, helper.GameContent);
             _mailBox = new Mailbox(this.Monitor, helper.GameContent); 
-            _trialManager = new TrialManager(this.Monitor, _mailBox);
+            _trialManager = new TrialManager(this.Monitor, _mailBox, _questbox);
 
 
             helper.Events.GameLoop.SaveLoaded += OnSaveLoaded;
