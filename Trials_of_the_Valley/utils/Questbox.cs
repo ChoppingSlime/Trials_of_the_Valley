@@ -31,15 +31,12 @@ namespace Trials_of_the_Valley.utils
             {
                 PendingQuests[questId] = questContent;
 
-                // Invalidate the Data/Mail cache so SMAPI will call OnAssetRequested again
+                // Invalidate the Data/Quests cache so SMAPI will call OnAssetRequested again
                 GameContent.InvalidateCache("Data/Quests");
 
                 Monitor.Log($"Queued quest '{questId}': {questContent}", LogLevel.Info);
-                // Actually give the mail to the player for today
-                if (!Game1.player.mailbox.Contains(questId)) { 
-                     Game1.player.mailbox.Add(questId);
-                     Game1.player.mailReceived.Add(questId);
-                }
+                
+                
             }
             else
             {

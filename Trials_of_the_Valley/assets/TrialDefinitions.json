@@ -1,5 +1,5 @@
 {
-    "HarvestSpecificCrop": [
+    "Basic": [
         {
             "ID": "harvest_ancient_fruit",
             "Type": "ItemHarvest",

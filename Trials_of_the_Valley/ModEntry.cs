@@ -13,15 +13,15 @@ namespace Trials_of_the_Valley
     public  class ModEntry : Mod
     {
         private TrialManager? _trialManager;
-        public static Mailbox? Mailbox;
+        public static Mailbox? _mailBox;
+        public static Questbox? _questbox;
 
 
         public override void Entry(IModHelper helper)
         {
-            
-            Mailbox = new Mailbox(this.Monitor, helper.GameContent);
-
-            _trialManager = new TrialManager(this.Monitor, Mailbox);
+            _questbox = new Questbox(this.Monitor, helper.GameContent);
+            _mailBox = new Mailbox(this.Monitor, helper.GameContent); 
+            _trialManager = new TrialManager(this.Monitor, _mailBox);
 
 
             helper.Events.GameLoop.SaveLoaded += OnSaveLoaded;
@@ -45,16 +45,29 @@ namespace Trials_of_the_Valley
         {
             if (e.NameWithoutLocale.IsEquivalentTo("Data/Mail"))   
             {
-                this.Monitor.Log("receiving request to mail asset", LogLevel.Info);
-
                 e.Edit(asset =>
                 {
-                    this.Monitor.Log("adding asset", LogLevel.Info);
+                    this.Monitor.Log("adding mail asset", LogLevel.Info);
 
                     var editor = asset.AsDictionary<string, string>();
-                    foreach (var mail in Mailbox.PendingMails)
+                    foreach (var mail in _mailBox.PendingMails)
                     {
                         editor.Data[mail.Key] = mail.Value;
+                    }
+
+                    this.Monitor.Log($"{editor}", LogLevel.Info);
+                });
+            }
+            if (e.NameWithoutLocale.IsEquivalentTo("Data/Quests"))
+            {
+                e.Edit(asset =>
+                {
+                    this.Monitor.Log("adding quest asset", LogLevel.Info);
+
+                    var editor = asset.AsDictionary<string, string>();
+                    foreach (var quest in _questbox.PendingQuests)
+                    {
+                        editor.Data[quest.Key] = quest.Value;
                     }
 
                     this.Monitor.Log($"{editor}", LogLevel.Info);

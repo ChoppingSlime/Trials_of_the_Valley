@@ -18,7 +18,7 @@ namespace Trials_of_the_Valley
         private Mailbox _mailbox;
         private readonly IMonitor _monitor;
 
-        private string TrialMailPrefix = "A new quest has arrived! ";
+        
 
         public TrialManager(IMonitor monitor, Mailbox mailbox)
         {
@@ -58,7 +58,7 @@ namespace Trials_of_the_Valley
             // if no trial definition loaded or null >> send an error
             if (TrialsByCondition == null || TrialsByCondition.Count == 0)
             {
-                this._monitor.Log("No trial definitions loaded", LogLevel.Error);
+                this._monitor.Log("No trial definitions could be loaded", LogLevel.Error);
                 return null;
             }
 
@@ -131,40 +131,74 @@ namespace Trials_of_the_Valley
             return true;
         }
 
+        /// <summary>
+        /// Gets a random trial, sets up a quest for it and sends the mail containing it.
+        /// </summary>
         public void GenerateNewTrialAndSendMail()
         {
-            _monitor.Log("Trying to add new trial", LogLevel.Info);
-
             Trial? trial = GetRandomTrial();
             if (trial == null)
             {
                 _monitor.Log("No valid trial coul be selected.", LogLevel.Warn);
                 return;
             }
-
-            string mailId = trial.ID;
-
-            if (!Game1.player.mailReceived.Contains(mailId))
+            if (!Game1.player.mailReceived.Contains(trial.ID))
             {
-                string mailContent = FormatTrialMail(trial);
-                _mailbox.AddMail(mailId, mailContent);
-                _monitor.Log($"Mail '{mailId}' sent for trial '{trial.ID}'", LogLevel.Info);
+                CreateTrialQuest(trial);
+                SendTrialMail(trial);
             }
             else
             {
-                _monitor.Log($"Mail '{mailId}' already received.", LogLevel.Debug);
+                _monitor.Log($"Mail '{trial.ID}' already received.", LogLevel.Debug);
             }
+
+
+
         }
 
-        private string FormatTrialMail(Trial trial)
+        /// <summary>
+        /// Creates the data for the Trial's quest and adds it to the cache.
+        /// </summary>
+        private void CreateTrialQuest(Trial trial)
         {
-            // Mail ID that will trigger the quest
-            string mailTitle = $"TrialMail_{trial.Title}";
+  
+            string mailContent = GenerateTrialMailContent(trial);
+            _mailbox.AddMail(trial.ID, mailContent);
 
-            // Actual message content
-            string content = $"{TrialMailPrefix}{trial.Description}[#]{mailTitle}";
+            _monitor.Log($"Mail '{trial.ID}' sent for trial '{trial.ID}'", LogLevel.Info);
+            
 
-            return content;
+        }
+
+        /// <summary>
+        /// Sends a mail containing description of the trial. When opened it will trigger the new quest.
+        /// </summary>
+        private void SendTrialMail(Trial trial)
+        {
+            string mailContent = GenerateTrialMailContent(trial);
+            _mailbox.AddMail(trial.ID, mailContent);
+
+            _monitor.Log($"Mail '{trial.ID}' sent for trial '{trial.ID}'", LogLevel.Info);
+
+        }
+
+        /// <summary>
+        /// Creates a proper mail content for the trial.
+        /// </summary>
+        /// <returns> The content of Trial mail.</returns>
+        private string GenerateTrialMailContent(Trial trial)
+        {
+            // Mail title
+            string mailTitle = $"{trial.Title} Trial";
+
+            
+            string TrialMailPrefix = "A new quest has arrived!";
+            string questTrigger = $"% item quest {trial.ID} true %%";
+
+            // Actual mail content
+            string mailContent = $"{TrialMailPrefix} {trial.Description}{questTrigger}[#]{mailTitle}";
+
+            return mailContent;
         }
 
 
